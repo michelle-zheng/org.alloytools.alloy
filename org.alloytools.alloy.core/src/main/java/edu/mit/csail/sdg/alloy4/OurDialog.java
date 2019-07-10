@@ -30,6 +30,7 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.io.File;
 import java.io.FilenameFilter;
+import java.util.Arrays;
 import java.util.Locale;
 
 import javax.swing.JButton;
@@ -189,6 +190,31 @@ public final class OurDialog {
             return (String) value;
         else
             return "";
+    }
+
+    /** This is all the function type options **/
+    public static String[] functionTypes = {
+            "Fully typed with functions",
+            "Fully typed with predicates",
+            "Untyped, range formula with predicates",
+            "Untyped, unscoped with predicates"
+    };
+
+    /**
+     * Asks the user to choose a function type; returns -1 if the user cancels the request.
+     */
+    public synchronized static int askAstraOption() {
+        JComboBox jcombo = new OurCombobox(functionTypes);
+        Object ans = show("Function option", JOptionPane.INFORMATION_MESSAGE, new Object[] {
+                "Please choose the function option:", jcombo
+        }, new Object[] {
+                "Ok", "Cancel"
+        }, "Cancel");
+        Object value = jcombo.getSelectedItem();
+        if (ans == "Ok" && (value instanceof String))
+            return Arrays.asList(functionTypes).indexOf(value);
+        else
+            return -1;
     }
 
     /**

@@ -25,17 +25,7 @@ import static kodkod.engine.Solution.Outcome.UNSATISFIABLE;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import org.alloytools.alloy.core.AlloyCore;
@@ -1415,6 +1405,20 @@ public final class A4Solution {
             Util.writeAll(out, sol.instance() != null ? "p cnf 1 1\n1 0\n" : "p cnf 1 2\n1 0\n-1 0\n");
             rep.resultCNF(out);
             return null;
+        }
+        if (opt.solver.equals(SatSolver.Fortress)) {
+//            File tmpCNF = File.createTempFile("tmp", ".java", new File(opt.tempDirectory));
+//            String out = tmpCNF.getAbsolutePath();
+//            Astra astra = new Astra(fgoal, bounds, opt.astraOption, opt, 1000);
+//            Util.writeAll(out, TranslateFortressToJava.convert(astra.getTheory()));
+//            rep.resultCNF(out);
+//            return null;
+        }
+        if (opt.solver.equals(SatSolver.Astra)) {
+//            Astra astra = new Astra(fgoal, bounds, opt.astraOption, opt, 1000);
+//            sol = astra.solve(astra.getTheory());
+//
+//            rep.resultCNF("hahahahaha");
         }
         if (!solver.options().solver().incremental() /*
                                                       * || solver.options().solver()==SATFactory. ZChaffMincost
