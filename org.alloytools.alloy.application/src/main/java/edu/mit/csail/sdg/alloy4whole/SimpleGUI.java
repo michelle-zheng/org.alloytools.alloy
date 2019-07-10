@@ -290,6 +290,11 @@ public final class SimpleGUI implements ComponentListener, Listener {
     private int                   subStackNow            = 0;
 
     /**
+     * The option for function if solver is Astra.
+     */
+    private int                astraOption               = 0;
+
+    /**
      * The list of commands (this field will be cleared to null when the text buffer
      * is edited).
      */
@@ -1167,6 +1172,7 @@ public final class SimpleGUI implements ComponentListener, Listener {
         opt.coreGranularity = CoreGranularity.get();
         opt.originalFilename = Util.canon(text.get().getFilename());
         opt.solver = Solver.get();
+        opt.astraOption = astraOption;
         task.bundleIndex = i;
         task.bundleWarningNonFatal = WarningNonfatal.get();
         task.map = text.takeSnapshot();
@@ -1410,17 +1416,30 @@ public final class SimpleGUI implements ComponentListener, Listener {
             optmenu.addSeparator();
 
             addToMenu(optmenu, Solver);
-            addToMenu(optmenu, SkolemDepth);
+            JMenu sMenu = addToMenu(optmenu, SkolemDepth);
+            sMenu.setEnabled(!(Solver.get() == SatSolver.Astra || Solver.get() == SatSolver.Fortress));
             JMenu cmMenu = addToMenu(optmenu, CoreMinimization);
             cmMenu.setEnabled(Solver.get() == SatSolver.MiniSatProverJNI);
             JMenu cgMenu = addToMenu(optmenu, CoreGranularity);
             cgMenu.setEnabled(Solver.get() == SatSolver.MiniSatProverJNI);
 
-            addToMenu(optmenu, AutoVisualize, RecordKodkod);
+            if (Solver.get() == SatSolver.Astra || Solver.get() == SatSolver.Fortress) {
+                menuItem(optmenu, "Visualize automatically", false);
+                menuItem(optmenu, "Record the Kodkod input/output", false);
+            } else {
+                addToMenu(optmenu, AutoVisualize, RecordKodkod);
+            }
 
             if (Version.experimental) {
-                addToMenu(optmenu, Unrolls);
-                addToMenu(optmenu, ImplicitThis, NoOverflow, InferPartialInstance);
+                JMenu uMenu = addToMenu(optmenu, Unrolls);
+                uMenu.setEnabled(!(Solver.get() == SatSolver.Astra || Solver.get() == SatSolver.Fortress));
+                if (Solver.get() == SatSolver.Astra || Solver.get() == SatSolver.Fortress) {
+                    menuItem(optmenu, "Enable 'implicit this' name resolution", false);
+                    menuItem(optmenu, "Prevent overflows", false);
+                    menuItem(optmenu, "Infer partial instance", false);
+                } else {
+                    addToMenu(optmenu, ImplicitThis, NoOverflow, InferPartialInstance);
+                }
             }
 
         } finally {
@@ -1474,6 +1493,27 @@ public final class SimpleGUI implements ComponentListener, Listener {
             text.enableSyntax(!SyntaxDisabled.get());
         }
         return wrapMe();
+    }
+
+    /**
+     * This method prompts the user for their choice of setting if they select Astra as a solver
+     * 0 - Fully typed with functions
+     * 1 - Fully typed with predicates
+     * 2 - Untyped, range formula with predicates
+     * 3 - Untyped, unscoped with predicates
+     */
+    private Runner doAskAstraOption() {
+        if (wrap)
+            return wrapMe();
+
+        if (Solver.get().equals(SatSolver.Astra)) {
+            int o = OurDialog.askAstraOption();
+            if (o != -1) {
+                astraOption = o;
+            }
+        }
+
+        return null;
     }
 
     // ===============================================================================================================//
@@ -2166,6 +2206,7 @@ public final class SimpleGUI implements ComponentListener, Listener {
             prefDialog.addChangeListener(wrapToChangeListener(doOptAntiAlias()), AntiAlias);
             prefDialog.addChangeListener(wrapToChangeListener(doOptSyntaxHighlighting()), SyntaxDisabled);
             prefDialog.addChangeListener(wrapToChangeListener(doLookAndFeel()), LAF);
+            prefDialog.addChangeListener(wrapToChangeListener(doAskAstraOption()), Solver);
         } finally {
             wrap = false;
         }

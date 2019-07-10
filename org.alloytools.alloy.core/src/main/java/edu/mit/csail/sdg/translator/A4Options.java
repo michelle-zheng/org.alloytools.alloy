@@ -182,11 +182,14 @@ public final class A4Options implements Serializable {
         public static final SatSolver CryptoMiniSatJNI = new SatSolver("cryptominisat(jni)", "CryptoMiniSat", null, null, true);
         /** SAT4J using native Java */
         public static final SatSolver SAT4J            = new SatSolver("sat4j", "SAT4J", null, null, true);
+        /** Astra */
+        public static final SatSolver Astra            = new SatSolver("astra", "Astra", null,null, true);
         /** Outputs the raw CNF file only */
         public static final SatSolver CNF              = new SatSolver("cnf", "Output CNF to file", null, null, true);
         /** Outputs the raw Kodkod file only */
         public static final SatSolver KK               = new SatSolver("kodkod", "Output Kodkod to file", null, null, true);
-
+        /** Outputs Fortress to file only */
+        public static final SatSolver Fortress         = new SatSolver("fortress", "Output Fortress to file", null, null, true);
     }
 
     /** This ensures the class can be serialized reliably. */
@@ -286,6 +289,15 @@ public final class A4Options implements Serializable {
      */
     public int       unrolls              = (-1);
 
+    /**
+     * This option specifies the function setting for Astra
+     * 0 - Fully typed with functions
+     * 1 - Fully typed with predicates
+     * 2 - Untyped, range formula with predicates
+     * 3 - Untyped, unscoped with predicates
+     */
+    public int       astraOption          = 0;
+
     /** This method makes a copy of this Options object. */
     public A4Options dup() {
         A4Options x = new A4Options();
@@ -301,6 +313,7 @@ public final class A4Options implements Serializable {
         x.recordKodkod = recordKodkod;
         x.noOverflow = noOverflow;
         x.coreGranularity = coreGranularity;
+        x.astraOption = astraOption;
         return x;
     }
 }

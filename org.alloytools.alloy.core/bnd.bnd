@@ -10,6 +10,11 @@
 	org.alloytools.kodkod.nativesat.x86-linux;version=latest,\
 	org.alloytools.kodkod.nativesat.x86-mac;version=latest,\
 	org.alloytools.kodkod.nativesat.x86-windows;version=latest, \
+	org.alloytools.core.astra;version=latest,\
+	lib/astra/astra.jar;version=file,\
+	lib/astra/fortress-2.0.jar;version=file,\
+	lib/astra/scala-library-2.12.8.jar;version=file,\
+	lib/astra/com.microsoft.z3.jar;version=file,\
 	org.eclipse.jdt.annotation
 
 -testpath: \

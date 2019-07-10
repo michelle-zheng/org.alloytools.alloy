@@ -98,8 +98,11 @@ import kodkod.instance.TupleSet;
 import kodkod.instance.Universe;
 import kodkod.util.ints.IndexedEntry;
 
+import fortress.msfol.Theory;
+import astra.*;
+
 /**
- * This class stores a SATISFIABLE or UNSATISFIABLE solution. It is also used as
+ * This class stores a SATISFIABLE or UNSATISFIABLE solution. It is albso used as
  * a staging area for the solver before generating the solution. Once solve()
  * has been called, then this object becomes immutable after that.
  */
@@ -364,6 +367,7 @@ public final class A4Solution {
             } catch (IOException ex) {
                 throw new ErrorFatal("Cannot create temporary directory.", ex);
             }
+        // TODO MICHELLE - Solvers set here
         } else if (opt.solver.equals(A4Options.SatSolver.LingelingJNI)) {
             solver.options().setSolver(SATFactory.Lingeling);
         } else if (opt.solver.equals(A4Options.SatSolver.PLingelingJNI)) {
@@ -1389,8 +1393,9 @@ public final class A4Solution {
         for (Relation r : bounds.relations()) {
             formulas.add(r.eq(r));
         } // Without this, kodkod refuses to grow unmentioned relations
+        // TODO MICHELLE - Add another case to make call to Astra solver, send fgoal, bounds, etc. over
         fgoal = Formula.and(formulas);
-        // Now pick the solver and solve it!
+        // Now pick the solver and solve it
         if (opt.solver.equals(SatSolver.KK)) {
             File tmpCNF = File.createTempFile("tmp", ".java", new File(opt.tempDirectory));
             String out = tmpCNF.getAbsolutePath();
@@ -1416,6 +1421,23 @@ public final class A4Solution {
             rep.resultCNF(out);
             return null;
         }
+        if (opt.solver.equals(SatSolver.Fortress)) {
+            File tmpCNF = File.createTempFile("tmp", ".java", new File(opt.tempDirectory));
+            String out = tmpCNF.getAbsolutePath();
+            Astra astra = new Astra(fgoal, bounds, 0, opt, 1000);
+            Util.writeAll(out, TranslateFortressToJava.convert(astra.getTheory()));
+            rep.resultCNF(out);
+            return null;
+        }
+        if (opt.solver.equals(SatSolver.Astra)) {
+            // set option as opt.astraOption later
+            Astra astra = new Astra(fgoal, bounds, 0, opt, 1000);
+            sol = astra.solve(astra.getTheory());
+
+            rep.resultCNF("hahahahaha");
+        }
+
+        // TODO MICHELLE - This is where the solver is called
         if (!solver.options().solver().incremental() /*
                                                       * || solver.options().solver()==SATFactory. ZChaffMincost
                                                       */) {
@@ -1426,6 +1448,8 @@ public final class A4Solution {
             if (sol == null)
                 sol = kEnumerator.next();
         }
+
+        // TODO MICHELLE - sol is the solution (class Solution) from SAT solvers, check class definition for what it contains
         if (!solved[0])
             rep.solve(0, 0, 0);
         final Instance inst = sol.instance();
@@ -1465,7 +1489,7 @@ public final class A4Solution {
         }
         // If satisfiable, then add/rename the atoms and skolems
         if (inst != null) {
-            eval = new Evaluator(inst, solver.options());
+            eval = new Evaluator(inst, solver.options()); // Modifies the A4Solution to contain the solution
             rename(this, null, null, new UniqueNameGenerator());
         }
         // report the result

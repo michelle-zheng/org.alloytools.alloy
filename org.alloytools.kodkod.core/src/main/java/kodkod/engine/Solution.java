@@ -33,10 +33,10 @@ import kodkod.instance.Instance;
  */
 public final class Solution {
 
-    private final Outcome    outcome;
-    private final Statistics stats;
-    private final Instance   instance;
-    private final Proof      proof;
+    private final Outcome    outcome; // SATISFIABLE OR UNSATISFIABLE
+    private final Statistics stats; // TIMING AND STUFF
+    private final Instance   instance; // SATISFYING INSTANCE
+    private final Proof      proof; // PROOF OF UNSATISFIABILITY
 
     /**
      * Constructs a Solution from the given values.
@@ -79,7 +79,7 @@ public final class Solution {
      * @return {s: Solution | s.outcome() = UNSATISFIABLE && s.stats() = stats &&
      *         s.proof() = proof }
      */
-    static Solution unsatisfiable(Statistics stats, Proof proof) {
+    public static Solution unsatisfiable(Statistics stats, Proof proof) {
         return new Solution(Outcome.UNSATISFIABLE, stats, null, proof);
     }
 
