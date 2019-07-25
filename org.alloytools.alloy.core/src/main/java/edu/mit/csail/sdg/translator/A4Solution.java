@@ -98,7 +98,6 @@ import kodkod.instance.TupleSet;
 import kodkod.instance.Universe;
 import kodkod.util.ints.IndexedEntry;
 
-import fortress.msfol.Theory;
 import astra.*;
 
 /**
@@ -1393,7 +1392,6 @@ public final class A4Solution {
         for (Relation r : bounds.relations()) {
             formulas.add(r.eq(r));
         } // Without this, kodkod refuses to grow unmentioned relations
-        // TODO MICHELLE - Add another case to make call to Astra solver, send fgoal, bounds, etc. over
         fgoal = Formula.and(formulas);
         // Now pick the solver and solve it
         if (opt.solver.equals(SatSolver.KK)) {
@@ -1424,20 +1422,16 @@ public final class A4Solution {
         if (opt.solver.equals(SatSolver.Fortress)) {
             File tmpCNF = File.createTempFile("tmp", ".java", new File(opt.tempDirectory));
             String out = tmpCNF.getAbsolutePath();
-            Astra astra = new Astra(fgoal, bounds, 0, opt, 1000);
+            Astra astra = new Astra(fgoal, bounds, opt.astraFormulaType, opt, opt.astraTimeLimit);
             Util.writeAll(out, TranslateFortressToJava.convert(astra.getTheory()));
             rep.resultCNF(out);
             return null;
         }
         if (opt.solver.equals(SatSolver.Astra)) {
-            // set option as opt.astraOption later
-            Astra astra = new Astra(fgoal, bounds, 0, opt, 1000);
+            Astra astra = new Astra(fgoal, bounds, opt.astraFormulaType, opt, opt.astraTimeLimit);
             sol = astra.solve(astra.getTheory());
-
-            rep.resultCNF("hahahahaha");
         }
 
-        // TODO MICHELLE - This is where the solver is called
         if (!solver.options().solver().incremental() /*
                                                       * || solver.options().solver()==SATFactory. ZChaffMincost
                                                       */) {
@@ -1449,7 +1443,6 @@ public final class A4Solution {
                 sol = kEnumerator.next();
         }
 
-        // TODO MICHELLE - sol is the solution (class Solution) from SAT solvers, check class definition for what it contains
         if (!solved[0])
             rep.solve(0, 0, 0);
         final Instance inst = sol.instance();

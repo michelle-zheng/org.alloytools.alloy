@@ -290,13 +290,18 @@ public final class A4Options implements Serializable {
     public int       unrolls              = (-1);
 
     /**
-     * This option specifies the function setting for Astra
+     * This option specifies the formula type for Astra
      * 0 - Fully typed with functions
      * 1 - Fully typed with predicates
      * 2 - Untyped, range formula with predicates
      * 3 - Untyped, unscoped with predicates
      */
-    public int       astraOption          = 0;
+    public int astraFormulaType = 0;
+
+    /**
+     * This option specifies the time limit on solving for Astra
+     */
+    public int astraTimeLimit = 1000;
 
     /** This method makes a copy of this Options object. */
     public A4Options dup() {
@@ -313,7 +318,8 @@ public final class A4Options implements Serializable {
         x.recordKodkod = recordKodkod;
         x.noOverflow = noOverflow;
         x.coreGranularity = coreGranularity;
-        x.astraOption = astraOption;
+        x.astraFormulaType = astraFormulaType;
+        x.astraTimeLimit = astraTimeLimit;
         return x;
     }
 }

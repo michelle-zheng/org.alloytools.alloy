@@ -278,6 +278,16 @@ public class PreferencesDialog extends JFrame {
             satChoices.remove(SatSolver.GlucoseJNI);
         if (!loadLibrary("cryptominisat"))
             satChoices.remove(SatSolver.CryptoMiniSatJNI);
+        try {
+            Class.forName("astra.Astra");
+        } catch (ClassNotFoundException e) {
+            log.logBold("Warning: Astra does not work since the libraries required are not present.\n");
+            log.log("This is okay, since you can still use SAT4J as the solver.\n" + "For more information, please visit http://alloy.mit.edu/alloy4/\n");
+            log.logDivider();
+            log.flush();
+            satChoices.remove(SatSolver.Astra);
+            satChoices.remove(SatSolver.Fortress);
+        }
         SatSolver now = Solver.get();
         if (!satChoices.contains(now)) {
             now = SatSolver.LingelingJNI;

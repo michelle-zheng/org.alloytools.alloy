@@ -69,15 +69,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Random;
-import java.util.Scanner;
-import java.util.Set;
+import java.util.*;
 
 import javax.swing.Action;
 import javax.swing.Box;
@@ -290,9 +282,18 @@ public final class SimpleGUI implements ComponentListener, Listener {
     private int                   subStackNow            = 0;
 
     /**
-     * The option for function if solver is Astra.
+     * The formula type if solver is Astra.
+     * 0 - Fully typed with functions
+     * 1 - Fully typed with predicates
+     * 2 - Untyped, range formula with predicates
+     * 3 - Untyped, unscoped with predicates
      */
-    private int                astraOption               = 0;
+    private int astraFormulaType = 0;
+
+    /**
+     * The time limit for solving if the solver is Astra
+     */
+    private int astraTimeLimit = 1000;
 
     /**
      * The list of commands (this field will be cleared to null when the text buffer
@@ -1172,7 +1173,8 @@ public final class SimpleGUI implements ComponentListener, Listener {
         opt.coreGranularity = CoreGranularity.get();
         opt.originalFilename = Util.canon(text.get().getFilename());
         opt.solver = Solver.get();
-        opt.astraOption = astraOption;
+        opt.astraFormulaType = astraFormulaType;
+        opt.astraTimeLimit = astraTimeLimit;
         task.bundleIndex = i;
         task.bundleWarningNonFatal = WarningNonfatal.get();
         task.map = text.takeSnapshot();
@@ -1495,21 +1497,43 @@ public final class SimpleGUI implements ComponentListener, Listener {
         return wrapMe();
     }
 
+    /** This is all the function type options **/
+    public static String[] functionTypes = {
+            "Fully typed with functions",
+            "Fully typed with predicates",
+            "Untyped, range formula with predicates",
+            "Untyped, unscoped with predicates"
+    };
+
     /**
      * This method prompts the user for their choice of setting if they select Astra as a solver
-     * 0 - Fully typed with functions
-     * 1 - Fully typed with predicates
-     * 2 - Untyped, range formula with predicates
-     * 3 - Untyped, unscoped with predicates
+     * This includes a time limit and a formula type.
      */
-    private Runner doAskAstraOption() {
+    private Runner doAskAstraOptions() {
         if (wrap)
             return wrapMe();
 
         if (Solver.get().equals(SatSolver.Astra)) {
-            int o = OurDialog.askAstraOption();
-            if (o != -1) {
-                astraOption = o;
+            String timeLimitInput = "";
+
+            JTextField textField = OurUtil.textfield(timeLimitInput, 10);
+            textField.selectAll();
+            JComboBox comboBox = new OurCombobox(functionTypes);
+
+            if (!OurDialog.getInput("Astra options", "Time limit", textField, " ", "Formula type", comboBox)) {
+                return null;
+            }
+            if (textField.getText().length() > 0) {
+                try {
+                    Integer.parseInt(textField.getText());
+                } catch (NumberFormatException e) {
+                    return null;
+                }
+            }
+
+            Object value = comboBox.getSelectedItem();
+            if (value instanceof String && Arrays.asList(functionTypes).indexOf(value) != -1) {
+                 astraFormulaType = Arrays.asList(functionTypes).indexOf(value);
             }
         }
 
@@ -2206,7 +2230,7 @@ public final class SimpleGUI implements ComponentListener, Listener {
             prefDialog.addChangeListener(wrapToChangeListener(doOptAntiAlias()), AntiAlias);
             prefDialog.addChangeListener(wrapToChangeListener(doOptSyntaxHighlighting()), SyntaxDisabled);
             prefDialog.addChangeListener(wrapToChangeListener(doLookAndFeel()), LAF);
-            prefDialog.addChangeListener(wrapToChangeListener(doAskAstraOption()), Solver);
+            prefDialog.addChangeListener(wrapToChangeListener(doAskAstraOptions()), Solver);
         } finally {
             wrap = false;
         }
